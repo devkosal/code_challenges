@@ -1,0 +1,5 @@
+Task Score / Total score is calculated based on how the program performs on our test data. A score less than 100 means that we have found some problems.
+
+Correctness describes how much the solution adheres to the specification. Points for correctness are deducted if the program produces invalid results or crashes.
+
+Performance describes if the program behaves correctly for large inputs. Points are deducted if the program exceeds the time limit on large data sets, which indicates a sub-optimal approach.
