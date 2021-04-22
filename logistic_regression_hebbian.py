@@ -1,9 +1,9 @@
 import numpy as np
 import numpy as np
-from sklearn.datasets import load_iris
+from sklearn.datasets import load_boston
 
 
-X,y = load_iris(return_X_y=True)
+X,y = load_boston(return_X_y=True)
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
@@ -12,10 +12,9 @@ scl = StandardScaler()
 X_train = scl.fit_transform(X_train)
 X_test = scl.transform(X_test)
 
-num_classes = len(set(y))
 num_feats = X.shape[1]
 
-layer = np.random.uniform(-0.1,1,(num_feats, num_classes))
+layer = np.random.uniform(-0.1,1,(num_feats, 1))
 
 num_epcohs = 100
 num_random_walks = 30
@@ -30,9 +29,15 @@ def ce_loss(logits,y):
 def accuracy(logits,y):
     return (logits.argmax(1) == y).mean()
 
+def rmse(logits, y):
+    return (np.mean((logits-y)**2))**.5
+
 def softmax(x):
     exps = np.exp(x)
     return exps/sum(exps)
+
+def normalize(x):
+    (x - x.mean(0))/s.std(0)
 
 coefs = np.random.uniform(0,1,5)
 α = 0.2
@@ -47,16 +52,17 @@ for e in range(num_epcohs):
         new_coefs[rw] = coefs + (np.random.randn(5)*σ)
         η, A, B, C, D = list(new_coefs[-1])
         for i in range(len(X_train)):
-            logits = sigmoid(X_train @ layer)
+            logits = X_train @ layer
             feats = X_train[i][...,None]
             acts = logits[i][None,...]
             diff = A*(feats @ acts) + B*feats + C*acts + D
             layer += η * diff
-        logits = sigmoid(X_train @ layer)
-        scores[rw] = accuracy(logits,y_train)
+        logits = X_train @ layer
+        scores[rw] = -rmse(logits,y_train)
     print(e, max(scores))
-    weighted_scores =  new_coefs * scores
-    coefs = coefs + (α/σ)*(weighted_scores.mean(0))
+    weighted_scores =  softmax(scores) 
+    print(e, max(weighted_scores))
+    coefs = coefs + (α/σ)*(new_coefs * weighted_scores).sum(0)
     
     
 
